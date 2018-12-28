@@ -1,29 +1,40 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Main : MonoBehaviour
 {
-    [SerializeField] private string _emptySudoku;
-    [SerializeField] private string _correctSolution;
 
     [SerializeField] private SudokuView _boardSudokuView;
+    [SerializeField] private InputField _inputField;
 
-    private void Start()
+    private void Update()
     {
-        var size = (int) Mathf.Sqrt(_emptySudoku.Length);
-        Debug.Log("Sudoku Size: " + size);
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            StartSolving();
+        }
+    }
+
+    private void StartSolving()
+    {
+        var sudokuString = _inputField.text;
+        sudokuString =  new string(sudokuString.Where(Char.IsDigit).ToArray());
+        var size = (int) Mathf.Sqrt(sudokuString.Length);
         
+        _boardSudokuView.Cleanup();
         _boardSudokuView.Initialize(size);
         
-        var board = new Board(size, _emptySudoku);
+        var board = new Board(size, sudokuString);
         _boardSudokuView.Visualize(board);
         
         var solver = new SudokuSolver();
-
       
         StartCoroutine(Solve(board, solver));
     }
-
+    
     private IEnumerator Solve(Board board, SudokuSolver solver)
     {
         var isSolved = false;
@@ -43,18 +54,6 @@ public class Main : MonoBehaviour
             _boardSudokuView.Visualize(board);
             
             yield return null;
-        }
-    }
-
-    private void PrintResult(string calculatedSolution)
-    {
-        if (_correctSolution == calculatedSolution)
-        {
-            Debug.Log("Correctly calculated");
-        }
-        else
-        {
-            Debug.Log("Error in Calculation");
         }
     }
 }

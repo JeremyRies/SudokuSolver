@@ -3,27 +3,13 @@ using System.Linq;
 using UnityEngine;
 using Random = System.Random;
 
-
 public class Board
 {
     private int[,] _entries;
-    private readonly Dictionary<Vector2Int, HashSet<int>> _possibleSolutions = new Dictionary<Vector2Int, HashSet<int>>();
-    
     private int _size;
     private int _boxSize;
     
     private Random _randgen;
-
-    public void AddPossibleSolution(int xpos, int ypos, int value)
-    {
-        HashSet<int> hashSet = _possibleSolutions[new Vector2Int(xpos, ypos)];
-        hashSet.Add(value);
-    }
-
-    public int GetPossibleSolutionCount(int xpos, int ypos)
-    {
-        return _possibleSolutions[new Vector2Int(xpos, ypos)].Count;
-    }
 
     public int[,] Entries
     {
@@ -86,7 +72,7 @@ public class Board
         List<int> entriesToCheck = new List<int>();
         entriesToCheck.AddRange(GetColumn(x));
         entriesToCheck.AddRange(GetRow(y));
-        entriesToCheck.AddRange(GetBox(x,y).Cast<int>());
+        entriesToCheck.AddRange(GetBox(x,y));
         
         foreach (var entry in entriesToCheck)
         {
@@ -135,9 +121,6 @@ public class Board
         int upperLeftYPos = yPos - (yPos % BoxSize);
         
         int[] boxValues= new int[BoxSize * BoxSize];
-//        Debug.Log("Original PosX: " + xPos + " Ypos " + yPos+ " ---------------------------");
-//        Debug.Log("upperLeftXPos: " + upperLeftXPos);
-//        Debug.Log("upperLeftYPos: " + upperLeftYPos);
         
         for (int x = 0; x < BoxSize; x++)
         {
@@ -148,7 +131,6 @@ public class Board
 
                 var boxValue = _entries[xpos, ypos];
                 
-//                Debug.Log("Xpos: " + xpos + " ypos: " + ypos + " value " + boxValue);
                 boxValues[y * BoxSize + x] = boxValue;
             }
         }
@@ -171,8 +153,8 @@ public class Board
         int yValue = 0;
         foreach (var entry in emptySudoku)
         {
-            var number = int.Parse("" + entry);
-//            Debug.Log("XValue: " + xValue + " yValue: " + yValue + " Entry: " + number);
+            var number = int.Parse("" + entry, System.Globalization.NumberStyles.HexNumber);
+
             _entries[xValue, yValue] = number;
             
             if (xValue < size-1)
@@ -184,11 +166,7 @@ public class Board
                 yValue++;
                 xValue = 0;
             }
-            
-            _possibleSolutions.Add(new Vector2Int(xValue,yValue), new HashSet<int>());
-        }
-        
-        
+        } 
     }
 
     public void Set(int positionX, int positionY, int number)
